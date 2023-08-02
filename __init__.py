@@ -1,144 +1,119 @@
-import json
+import json  # 导入json模块
+import requests  # 导入requests模块
+import customtkinter as ctk  # 导入customtkinter模块
 
-import requests
-from PyQt5.QtWidgets import (QApplication, QWidget, QLineEdit,
-                             QPushButton, QTextEdit, QLabel, QFormLayout, QRadioButton)
+ctk.set_appearance_mode("Light")  # 设置外观为Light模式
 
 
-class MainWindow(QWidget):
-
+class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.type = None
-        self.paper_book_button = None
-        self.ebook_button = None
-        self.setWindowTitle('笔记导入')
+        # 设置窗口标题
+        self.title("笔记导入")  # 设置窗口标题
 
-        layout = QFormLayout()
-        self.ipLabel = QLabel('请输入 ip 地址(必填):', self)
-        self.ipEdit = QLineEdit()
-        layout.addRow(self.ipLabel, self.ipEdit)
+        # 设置窗口大小
+        self.minsize(500, 400)
+        self.geometry("500 + 500 + 100 + 10")
 
-        self.titleLabel = QLabel('请输入书名(必填):', self)
-        self.titleEdit = QLineEdit()
-        layout.addRow(self.titleLabel, self.titleEdit)
+        # 创建组件
+        self.ip_label = ctk.CTkLabel(master=self, text="请输入ip地址(必填):")  # 创建ip标签
+        self.ip_entry = ctk.CTkEntry(master=self)  # 创建ip输入框
 
-        self.authorLabel = QLabel('请输入作者:', self)
-        self.authorEdit = QLineEdit()
-        layout.addRow(self.authorLabel, self.authorEdit)
+        self.title_label = ctk.CTkLabel(master=self, text="请输入书名(必填):")  # 创建书名标签
+        self.title_entry = ctk.CTkEntry(master=self)  # 创建书名输入框
 
-        self.translatorLabel = QLabel('请输入译者:', self)
-        self.translatorEdit = QLineEdit()
-        layout.addRow(self.translatorLabel, self.translatorEdit)
+        self.author_label = ctk.CTkLabel(master=self, text="请输入作者:")  # 创建作者标签
+        self.author_entry = ctk.CTkEntry(master=self)  # 创建作者输入框
 
-        self.textLabel = QLabel('在这里写原文:', self)
-        self.textEdit = QTextEdit()
-        layout.addRow(self.textLabel, self.textEdit)
+        self.translator_label = ctk.CTkLabel(master=self, text="请输入译者:")  # 创建译者标签
+        self.translator_entry = ctk.CTkEntry(master=self)  # 创建译者输入框
 
-        self.noteLabel = QLabel('在这里写想法:', self)
-        self.noteEdit = QTextEdit()
-        layout.addRow(self.noteLabel, self.noteEdit)
+        self.text_label = ctk.CTkLabel(master=self, text="在这里写原文:")  # 创建原文标签
+        self.text_text = ctk.CTkTextbox(master=self)  # 创建原文文本框
 
-        self.publisherLabel = QLabel('请输入出版社:', self)
-        self.publisherEdit = QLineEdit()
-        layout.addRow(self.publisherLabel, self.publisherEdit)
+        self.note_label = ctk.CTkLabel(master=self, text="在这里写想法:")  # 创建笔记标签
+        self.note_text = ctk.CTkTextbox(master=self)  # 创建笔记文本框
 
-        self.isbnLabel = QLabel("请输入图书ISBN:", self)
-        self.isbnEdit = QLineEdit()
-        layout.addRow(self.isbnLabel, self.isbnEdit)
+        self.publisher_label = ctk.CTkLabel(master=self, text="请输入出版社:")  # 创建出版社标签
+        self.publisher_entry = ctk.CTkEntry(master=self)  # 创建出版社输入框
 
-        # combo_box = QComboBox(self)
-        # combo_box.addItem('纸质书')
-        # combo_box.addItem('电子书')
-        # combo_box.move(50, 160)
-        # layout.addRow(combo_box)
+        self.isbn_label = ctk.CTkLabel(master=self, text="请输入图书ISBN:")  # 创建ISBN标签
+        self.isbn_entry = ctk.CTkEntry(master=self)  # 创建ISBN输入框
 
-        self.init_ui(layout)
+        self.submit_btn = ctk.CTkButton(master=self, text="提交", command=self.submit_note)  # 创建提交按钮并绑定事件
 
-        self.submitBtn = QPushButton('提交')
-        self.submitBtn.clicked.connect(self.submit_note)
-        layout.addWidget(self.submitBtn)
+        # 设置布局
+        self.grid_columnconfigure(1, weight=1)  # 设置列 1 扩张 比例为 1
 
-        self.setLayout(layout)
+        self.ip_label.grid(row=0, column=0, pady=10, padx=10)  # 布局ip标签
+        self.ip_entry.grid(row=0, column=1, pady=10, padx=10, sticky="ew")  # 布局ip输入框
 
-    def init_ui(self, layout):
-        """ 书籍类型 """
-        self.paper_book_button = QRadioButton('纸质书')
-        self.ebook_button = QRadioButton('电子书')
+        self.title_label.grid(row=1, column=0, pady=10, padx=10)  # 布局书名标签
+        self.title_entry.grid(row=1, column=1, pady=10, padx=10, sticky="ew")  # 布局书名输入框
 
-        layout.addWidget(self.paper_book_button)
-        layout.addWidget(self.ebook_button)
+        self.author_label.grid(row=2, column=0, pady=10, padx=10)  # 布局作者标签
+        self.author_entry.grid(row=2, column=1, pady=10, padx=10, sticky="ew")  # 布局作者输入框
 
-        self.setLayout(layout)
-        self.setWindowTitle('单选框')
+        self.translator_label.grid(row=3, column=0, pady=10, padx=10)  # 布局译者标签
+        self.translator_entry.grid(row=3, column=1, pady=10, padx=10, sticky="ew")  # 布局译者输入框
 
-    def clear(self):
-        for widget in reversed(self.ui.widgets):
-            if isinstance(widget, (QLineEdit, QTextEdit)):
-                widget.clear()
+        self.text_label.grid(row=4, column=0, pady=10, padx=10)  # 布局原文标签
+        self.text_text.grid(row=4, column=1, pady=10, padx=10, sticky="ew")  # 布局原文文本框
 
-    def on_radio_button_clicked(self):
+        self.note_label.grid(row=5, column=0, pady=10, padx=10)  # 布局笔记标签
+        self.note_text.grid(row=5, column=1, pady=10, padx=10, sticky="ew")  # 布局笔记文本框
 
-        # 检查单选按钮的被选中状态
-        if self.paper_book_button.isChecked():
-            self.type = 0
-        elif self.ebook_button.isChecked():
-            self.type = 1
-        # 连接单选按钮的 clicked() 信号
-        self.paper_book_button.clicked.connect(self.on_radio_button_clicked)
-        self.ebook_button.clicked.connect(self.on_radio_button_clicked)
+        self.publisher_label.grid(row=6, column=0, pady=10, padx=10)  # 布局出版社标签
+        self.publisher_entry.grid(row=6, column=1, pady=10, padx=10, sticky="ew")  # 布局出版社输入框
+
+        self.isbn_label.grid(row=7, column=0, pady=10, padx=10)  # 布局ISBN标签
+        self.isbn_entry.grid(row=7, column=1, pady=10, padx=10, sticky="ew")  # 布局ISBN输入框
+
+        self.submit_btn.grid(row=8, column=1, pady=10, padx=10, sticky="e")  # 布局提交按钮
 
     def submit_note(self):
-        title = self.titleEdit.text()
-        author = self.authorEdit.text()
-        translator = self.translatorEdit.text()
-        publisher = self.publisherEdit.text()
-        isbn = self.isbnEdit.text()
-        book_type = self.type
+        # 获取输入
+        ip = self.ip_entry.get()  # 获取ip输入
+        title = self.title_entry.get()  # 获取书名输入
+        author = self.author_entry.get()  # 获取作者输入
+        translator = self.translator_entry.get()  # 获取译者输入
+        publisher = self.publisher_entry.get()  # 获取出版社输入
+        isbn = self.isbn_entry.get()  # 获取ISBN输入
+        text = self.text_text.get("1.0", "end")  # 获取原文输入
+        note = self.note_text.get("1.0", "end")  # 获取笔记输入
 
-        text = self.textEdit.toPlainText()
-        note = self.noteEdit.toPlainText()
-
+        # 构造数据
         data = {
-            "title": title,
-            "author": author,
-            # "cover": "https://img2.doubanio.com/view/subject/l/public/s29707472.jpg",
-            "translator": translator,
-            "publisher": publisher,
-            "publishDate": 1519833600,
-            "isbn": isbn,
-            "type": book_type,
-            "locationUnit": 2,
+            "title": title,  # 书名：必填
+            # "cover": "https:#img2.doubanio.com/view/subject/l/public/s29707472.jpg",  # 书籍封面：选填
+            "author": author,  # 作者：选填
+            "translator": translator,  # 译者：选填
+            "publisher": publisher,  # 出版社：选填
+            # "publishDate": 1519833600,  # 出版日期：单位秒，选填
+            "isbn": isbn,  # ISBN：选填
+            "type": 1,  # 书籍类型，必填。可取值：0：纸质书；1：电子书
+            "locationUnit": 1,  # 书籍页码类型，必填。可取值：0：进度；1：位置；2：页码
             "entries": [{
-                "page": 100,  # 书籍页码\位置\进度，选填
-                "text": "与其苦苦追寻失去的东西，还不如好好珍惜自己眼前拥有的东西。",  # 原文摘录，选填
-                "note": note,  # 想法，选填
-                # "chapter": "春",  # 章节，选填
-                # "time": 1652544669  # 笔记创建日期时间，选填
-
+                "text": text,
+                "note": note
             }]
         }
 
-        url = 'http://' + self.ipEdit.text() + ':8080/send'
+        # 发送请求
+        url = 'http://' + ip + ':8080/send'  # 构造请求URL
+        # url = 'http://172.31.254.122:8080/send'  # 构造请求URL
+        headers = {'ContentType': 'application/json'}  # 设置请求头
 
-        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, data=json.dumps(data), headers=headers)  # 发送POST请求
 
-        # 在submitNote方法中
-
-        response = requests.post(url, data=json.dumps(data), headers=headers)
-
-        if response.status_code == 200:
-            print('保存成功!')
-            # self.titleEdit.clear()
-            # self.authorEdit.clear()
-            self.noteEdit.clear()
+        if response.status_code == 200:  # 判断返回状态码
+            print("保存成功!")
+            # self.note_text.delete("1.0", "end")  # 清空笔记文本框
         else:
-            print('保存失败,请重试')
+            print("保存失败,请重试")
 
 
-if __name__ == '__main__':
-    app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec_()
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
