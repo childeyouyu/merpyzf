@@ -103,6 +103,9 @@ class App(ctk.CTk):
         # 发送请求
         url = 'http://' + ip + ':8080/send'  # 构造请求URL
         # url = 'http://172.31.254.122:8080/send'  # 构造请求URL
+        # url = 'http://192.168.124.45:8080/send'  # 公司内网地址
+        url = 'http://192.168.1.113:8080/send'  # 公司内网地址
+
         headers = {'ContentType': 'application/json'}  # 设置请求头
 
         response = requests.post(url, data=json.dumps(data), headers=headers)  # 发送POST请求
